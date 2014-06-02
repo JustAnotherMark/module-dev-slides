@@ -1,0 +1,716 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Module Specialisation</title>
+
+    <meta name="description" content="Doing Drupal Modules Properly">
+    <meta name="author" content="Mark Jones">
+
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+    <link rel="stylesheet" href="css/reveal.min.css">
+    <link rel="stylesheet" href="css/theme/sky.css" id="theme">
+    <link rel="stylesheet" href="css/theme/custom.css" id="custom">
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- If the query includes 'print-pdf', include the PDF print sheet -->
+    <script>
+        if( window.location.search.match( /print-pdf/gi ) ) {
+            var link = document.createElement( 'link' );
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.href = 'css/print/pdf.css';
+            document.getElementsByTagName( 'head' )[0].appendChild( link );
+        }
+    </script>
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+</head>
+
+<body>
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section class="title">
+            <h1>Module Structures</h1>
+            <h2>Mark Jones</h2>
+            <h2>@JustAnotherMark</h2>
+
+            <aside class="notes">
+                <ul>
+                    <li>Intro</li>
+                    <li>Who am I?</li>
+                    <li>What do I do?</li>
+                    <li>Drupal Experience</li>
+                    <li>Talk Experience</li>
+                </ul>
+            </aside>
+        </section>
+
+        <section>
+            <h2>Structures / Components</h2>
+            <ol>
+                <li>Basic</li>
+                <li>Include files</li>
+                <li>Custom Hooks</li>
+                <li>Custom Info Hooks</li>
+                <li>Custom Include Files</li>
+                <li>UI Modules</li>
+                <li>API Modules</li>
+            </ol>
+
+            <aside class="notes">
+                <ul>
+                    <li>Brief explanation of each</li>
+                    <li>My classification, may be missing some</li>
+                    <li>UI/API modules uses the others</li>
+                </ul>
+            </aside>
+        </section>
+
+        <section>
+            <section>
+                <h1>Principles</h1>
+            </section>
+
+            <section>
+                <h2>Separation of concerns</h2>
+                <ul>
+                    <li>Too difficult to picture everything</li>
+                    <li>Define interfaces</li>
+                    <li>Focus on individual part</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Keep it simple</h2>
+                <ul>
+                    <li>Don't over-engineer</li>
+                    <li>Code for everyone on the team</li>
+                    <li>Code for future you</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Allow for changes</h2>
+                <ul>
+                    <li>Contradicts 'Keep it simple'</li>
+                    <li>Flexibility over perfection</li>
+                    <li>Drupal hook system helps</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Learn from others</h2>
+                <ul>
+                    <li>Look at core</li>
+                    <li>Look at contrib</li>
+                    <li>Look at Drupal 8</li>
+                    <li>Look outside Drupal</li>
+                    <li>Talk to people!</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Examples</h2>
+                <p>Examples project</p>
+                <p><a href="http://dgo.to/examples">http://dgo.to/examples</a></p>
+            </section>
+
+        </section>
+        <section>
+            <h1>Onto the Code</h1>
+        </section>
+        <!-- BASIC PAGE. -->
+        <section>
+            <section>
+                <h2>1. Basic</h2>
+                <ul>
+                    <li>Everything in <code>.info</code>, <code>.module</code> and <code>.install</code></li>
+                    <li>Perfect for simple modules</li>
+                    <li>Will get unwieldy for complex modules</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>.info Files</h2>
+                <p><a href="http://drupalcontrib.org/api/drupal/contributions%21date%21date_popup%21date_popup.info/7">date_popup.info</a></p>
+                <pre><code class="no-highlight">name = Date Popup
+description = Enables jquery popup calendars and time entry widgets for selecting dates and times.
+dependencies[] = date_api
+package = Date/Time
+core = 7.x
+configure = admin/config/date/date_popup
+
+stylesheets[all][] = themes/datepicker.1.7.css</code></pre>
+            </section>
+
+            <section>
+                <h2>.module Files</h2>
+                <p><a href="http://drupalcontrib.org/api/drupal/contributions%21date%21date_popup%21date_popup.module/7">date_popup.module</a></p>
+                <pre><code class="php">/**
+ * Load needed files.
+ */
+function date_popup_add() {
+  static $loaded = FALSE;
+  if ($loaded) {
+    return;
+  }</code></pre>
+            </section>
+
+            <section>
+                <h2>.install Files</h2>
+                <p><a href="http://cgit.drupalcode.org/commerce_coupon/tree/commerce_coupon.install">commerce_coupon.install</a></p>
+                <pre><code class="php">function commerce_coupon_schema() {
+  $schema['commerce_coupon'] = array(
+    'description' => 'The base table for coupons.',
+      'fields' => array(
+        'coupon_id' => array(
+          'description' => 'The primary identifier for the coupon.',
+          'type' => 'serial',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+      ),
+</code></pre>
+                <p><a href="https://drupal.org/node/876250">Writing .install files</a></p>
+            </section>
+
+            <section>
+                <h2>Asset files</h2>
+                <ul>
+                    <li>CSS/JavaScript</li>
+                    <li>Images</li>
+                    <li>Readme.txt</li>
+                </ul>
+            </section>
+
+            <!-- <section> -->
+                <!-- <h2>Most common hooks</h2> -->
+                <!-- <ul> -->
+                    <!-- <li><code>hook_menu()</code></li> -->
+                    <!-- <li><code>hook_install()/hook_uninstall()</code></li> -->
+                    <!-- <li><code>hook_permission()</code></li> -->
+                    <!-- <li>Source: <a href="https://gist.github.com/webchickenator/4409685">https://gist.github.com/webchickenator/4409685</a></li> -->
+                <!-- </ul> -->
+            <!-- </section> -->
+
+            <section>
+                <h2>Examples</h2>
+                <ul>
+                    <li><a href="http://dgo.to/field_formatter_settings">Field Formatter Settings</a>
+                        <ul>
+                            <li><a href="http://dgo.to/field_delimiter">Field Delimiter</a>, <a href="http://dgo.to/field_formatter_class">Field Formatter Class</a>, <a href="http://dgo.to/field_injector">Field Injector</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="http://dgo.to/date">Date submodules</a><ul><li>Date Popup</a>, Date Context, Date All Day</li></ul></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Pros & Cons</h2>
+                <ul>
+                    <li>Keeps it simple</li>
+                    <li>Separation through modules</li>
+                    <li>Doesn't build for the future</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Why & When?</h2>
+                <ul>
+                    <li>Function order
+                        <ul>
+                            <li>Hooks</li>
+                            <li>Alters</li>
+                            <li>Other functions</li>
+                        </ul>
+                    </li>
+                    <li>Be consistent</li>
+                    <li>Can't really go wrong</li>
+                </ul>
+            </section>
+        </section>
+
+        <!-- INCLUDE FILES. -->
+        <section>
+
+            <section>
+                <h2>2. Include Files</h2>
+                <ul>
+                    <li>Some standard ones:
+                        <ul>
+                            <li><code>[module].rules_defaults.inc</code></li>
+                            <li><code>[module].views_defaults.inc</code></li>
+                            <li><code>[module].admin.inc</code></li>
+                        </ul>
+                    </li>
+                    <li>Allows related hooks & functions to be grouped together</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Aside 1 [Classes]</h2>
+                <ul>
+                    <li>Can autoload classes</li>
+                    <li>Reference in .info file
+                        <pre><code class="no-highlight">files[] = path/to/filename.inc</code></pre></li>
+                    <li>Class loaded with module</li>
+                    <li>Used by SimpleTest</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Aside 2 [Features]</h2>
+                <ul>
+                    <li>Features uses them heavily</li>
+                    <li>Generated code only</li>
+                    <li>Allows .module to use custom code only</li>
+                    <li>Be wary of files/hooks Features might use</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Examples</h2>
+                <p><a href="http://cgit.drupalcode.org/commerce_discount/tree/commerce_discount.rules.inc">commerce_discount.rules.inc</a></p>
+                 <img src="./images/commerce-discount.png" />
+            </section>
+
+            <section>
+                <h2>Pros & Cons</h2>
+                <ul>
+                    <li>Still simple</li>
+                    <li>Extra separation within the module</li>
+                    <li>Number of files limits future</li>
+                    <li>Not always well documented</li>
+                </ul>
+                <aside class="notes">Particularly for exported code</aside>
+            </section>
+
+            <section>
+                <h2>Why & When?</h2>
+                <ul>
+                    <li>Consider if multiple functions could use a standard .inc file</li>
+                    <li>Be suspicious if .module has more than 15 functions</li>
+                    <li>Little reason not to</li>
+                </ul>
+            </section>
+
+        </section>
+
+        <!-- CUSTOM HOOKS. -->
+        <section>
+            <section>
+                <h2>3. Custom Hooks</h2>
+                <ul>
+                    <li>Allow other modules to add or alter</li>
+                    <li>Module can implement its own hooks</li>
+                    <li>Prefix hook with module name
+                        <ul><li><code>hook_[my_module]_office_presave()</code></li></ul>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>How?</h2>
+                <ul>
+                    <li><code><a href="https://api.drupal.org/api/drupal/includes!module.inc/function/module_invoke_all/7">module_invoke_all($hook, $arg1, $arg2)</a></code>
+                        <ul>
+                            <li><code>Implements hook_[hook]()</code></li>
+                        </ul>
+                    </li>
+                    <li><code><a href="https://api.drupal.org/api/drupal/includes!module.inc/function/drupal_alter/7">drupal_alter($type, $data, $arg1, $arg2)</a></code>
+                        <ul>
+                            <li><code>Implements hook_[type]_alter()</code></li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Examples</h2>
+                <ul>
+                    <li><a href="https://api.drupal.org/api/drupal/modules!node!node.api.php/function/hook_node_presave/7">hook_node_presave()</a>
+                    <pre><code class="php">// Let modules modify the node before it is saved to the database.
+module_invoke_all('node_presave', $node);
+module_invoke_all('entity_presave', $node, 'node');</code></pre>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Examples</h2>
+                <ul>
+                    <li><a href="https://api.drupal.org/api/drupal/core!modules!field_ui!field_ui.api.php/function/hook_field_formatter_settings_form_alter/8">hook_field_formatter_settings_form_alter()</a>
+                    <pre><code class="php">drupal_alter('field_formatter_settings_form',
+  $form['options']['settings'],
+  $context);</code></pre></li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>A Third Way</h2>
+                    <ul><li><a href="https://api.drupal.org/api/drupal/modules%21system%21system.api.php/function/hook_menu/7">hook_menu()</a>
+                        <pre><code class="php">$callbacks = array();
+  foreach (module_implements('menu') as $module) {
+    $router_items = call_user_func($module . '_menu');
+    if (isset($router_items) && is_array($router_items)) {
+      foreach (array_keys($router_items) as $path) {
+        $router_items[$path]['module'] = $module;
+      }
+      $callbacks = array_merge($callbacks, $router_items);
+    }
+  }?</code></pre>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>A Third Way</h2>
+                <pre><code class="php">function module_invoke_all($hook) {
+  $args = func_get_args();
+  // Remove $hook from the arguments.
+  unset($args[0]);
+  $return = array();
+  foreach (module_implements($hook) as $module) {
+    $function = $module . '_' . $hook;
+    if (function_exists($function)) {
+      $result = call_user_func_array($function, $args);
+      if (isset($result) && is_array($result)) {
+        $return = array_merge_recursive($return, $result);
+      }
+      elseif (isset($result)) {
+        $return[] = $result;
+      }
+    }
+  }
+
+  return $return;
+}</code></pre>
+            </section>
+            <section>
+                <h2>Pros & Cons</h2>
+                <ul>
+                    <li>Allows much greater reusability</li>
+                    <li>Others can alter behaviour without hacking your module</li>
+                    <li>Starting to get more complex</li>
+                    <li>Some performance effect (although caching helps)</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Why & When?</h2>
+                <ul>
+                    <li>Don't overuse</li>
+                    <li>Very useful for plugins/future extensions</li>
+                    <li>E.g. Social media integration</li>
+                </ul>
+            </section>
+
+        </section>
+
+        <!-- CUSTOM INFO HOOKS. -->
+        <section>
+            <section>
+                <h2>4. Custom Info Hooks</h2>
+                <ul>
+                    <li>Allow other modules to define
+                        <ul>
+                            <li>multiple parameters</li>
+                            <li>callbacks</li>
+                            <li>classes</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Examples</h2>
+                <p><a href="https://api.drupal.org/api/drupal/modules%21poll%21poll.module/function/poll_node_info/7">poll_node_info()</a></p>
+                <pre><code class="php">function poll_node_info() {
+  return array(
+    'poll' => array(
+      'name' => t('Poll'),
+      'base' => 'poll',
+      'description' => t('A <em>poll</em> is a question with a set of possible responses. A <em>poll</em>, once created, automatically provides a simple running count of the number of votes received for each response.'),
+      'title_label' => t('Question'),
+      'has_body' => FALSE,
+    ),
+  );
+}</code></pre>
+            </section>
+
+            <section>
+                <h2>Examples</h2>
+                <p><a href="https://api.drupal.org/api/drupal/modules%21node%21node.module/function/_node_types_build/7">_node_types_build()</a></p>
+                <pre><code class="php">foreach (module_implements('node_info') as $module) {
+  $info_array = module_invoke($module, 'node_info');
+  foreach ($info_array as $type => $info) {
+    $info['type'] = $type;
+    $_node_types->types[$type] = node_type_set_defaults($info);
+    $_node_types->types[$type]->module = $module;
+    $_node_types->names[$type] = $info['name'];
+  }
+}</code></pre>
+            </section>
+
+            <section>
+                <h2>Pros & Cons</h2>
+                <ul>
+                    <li>More implementer control</li>
+                    <li>Easier for implementers to share code</li>
+                    <li>One call for all implementing info</li>
+                    <li>More complicated</li>
+                    <li>Need to store/reload/update info</li>
+                </ul>
+                <aside class="notes">
+                    Static variables, cache table, etc
+                </aside>
+            </section>
+
+            <section>
+                <h2>Why & When?</h2>
+                <ul>
+                    <li>Info only & use callbacks/hooks for code</li>
+                    <li>Useful if implementers may define many</li>
+                    <li>Reusable modules most of the time</li>
+                </ul>
+            </section>
+        </section>
+
+        <!-- CUSTOM INCLUDE FILES. -->
+        <section>
+            <section>
+                <h2>5. Custom Include Files</h2>
+                <ul>
+                    <li>Enable implementers to separate code</li>
+                    <li>Improve implementers structure</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Examples</h2>
+                <ul>
+                    <li><a href="http://drupalcontrib.org/api/drupal/contributions%21rules%21rules.rules.inc/7">rules.rules.inc</a>
+                        <pre><code class="php">/**
+ * Load all module includes as soon as this file gets included, which is done
+ * automatically by module_implements().
+ */
+foreach (rules_core_modules() as $module) {
+  module_load_include('inc', 'rules', "modules/$module.rules");
+  module_load_include('inc', 'rules', 'modules/events');
+}
+</code></pre>
+                    </li>
+                    <li>Note: not in a function</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Pros & Cons</h2>
+                <ul>
+                    <li>Fairly complex</li>
+                    <li>Can cause confusion</li>
+                    <li>Only helpful with lots of implementers</li>
+                    <li>Provides separation for implementers</li>
+                    <li>Developers know where to start looking</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Why & When?</h2>
+                <ul>
+                    <li>Beyond most day to day use cases</li>
+                    <li>Only for modules with many custom hooks</li>
+                    <li>Only use it for big contrib modules</li>
+                    <li>Useful to understand for debugging</li>
+                </ul>
+            </section>
+
+        </section>
+
+        <!-- UI MODULES. -->
+        <section>
+            <section>
+                <h2>6. UI Modules</h2>
+                <ul>
+                    <li>Allow disabling of admin pages</li>
+                    <li>Prevent config/settings tampering</li>
+                    <li>Functionality still works</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Examples</h2>
+                <ul>
+                    <li>Rules</li>
+                    <img src="images/rules-ui.png" />
+                    <li>Views</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Pros & Cons</h2>
+                <ul>
+                    <li>Increase separation</li>
+                    <li>Simpler than permissions</li>
+                    <li>Restrict curious users</li>
+                    <li>Prevent fixing on one environment</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Why & When?</h2>
+                <ul>
+                    <li>It depends</li>
+                    <li>Unnecessary for most modules</li>
+                    <li>Depends on client for custom development</li>
+                </ul>
+            </section>
+
+        </section>
+
+        <!-- API MODULES. -->
+        <section>
+            <section>
+                <h2>7. API Modules</h2>
+                <ul>
+                    <li>Put previous steps together</li>
+                    <li>No implementations within the module(ish)</li>
+                    <li>Provide submodule for default behaviours</li>
+                    <li>If not required consider making submodules a separate project</li>
+                </ul>
+            </section>
+            <section>
+                <h2>Examples</h2>
+                <ul>
+                    <li><a href="http://dgo.to/search_api">Search API</a>
+                        <ul>
+                            <li>Not really a different structure</li>
+                            <li>Plugins for everything
+                                <ul>
+                                    <li><a href="http://dgo.to/search_api_solr">Solr</a>, <a href="http://dgo.to/search_api_db">Database</a>, <a href="http://dgo.to/search_api_mongodb">Mongo</a></li>
+                                    <li><a href="http://dgo.to/search_api_page">Search Pages</a>, <a href="http://dgo.to/search_api_saved_searches">Saved Searches</a>, etc</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>More Examples</h2>
+                <ul>
+                    <li><a href="http://dgo.to/charts">Charts</a>
+                        <ul>
+                            <li>2 plugins provided (Google Charts & Highcharts)</li>
+                        </ul>
+                    </li>
+                    <li><a href="http://dgo.to/charts_graphs">Charts and Graphs</a>
+                        <ul>
+                            <li>Multiple sandbox implementers (<a href="http://dgo.to/charts_graphs_flot">Flot</a>, <a href="https://drupal.org/sandbox/ssekono/2028575">D3</a>, <a href="https://drupal.org/sandbox/dmulindwa/1973492">Bluff</a>, <a href="https://drupal.org/sandbox/dmulindwa/1973720">Google Charts</a>)</li>
+                        </ul>
+                    </li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Pros & Cons</h2>
+                <ul>
+                    <li>Makes no assumptions about usage</li>
+                    <li>Standard interface for similar modules</li>
+                    <li>Separation of core from implementations</li>
+                    <li>Prevents duplication</li>
+                </ul>
+            </section>
+
+            <section>
+                <h2>Why & When?</h2>
+                <ul>
+                    <li>Only for contrib or widely reusable</li>
+                    <li>Plugins can focus on what they're good at</li>
+                    <li>Can be more difficult to find relevant code</li>
+                </ul>
+            </section>
+
+        </section>
+
+        <section>
+            <section>
+                <h2>Summary</h2>
+                <p>What do I hope you'll take away from this talk?</p>
+            </section>
+
+            <section>
+                <h2>Overview of module structures</h2>
+            </section>
+
+            <section>
+                <h2>API docs are your friend</h2>
+            </section>
+
+            <section>
+                <h2>Publish & ask others</h2>
+            </section>
+
+            <section>
+                <h2>Get it working then get it right</h2>
+            </section>
+        </section>
+
+        <section>
+            <h2>Questions</h2>
+            <ul>
+                <li>Twitter: @JustAnotherMark</li>
+                <li>Drupal.org: justanothermark</li>
+            </ul>
+        </section>
+    </div>
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.min.js"></script>
+
+<script>
+
+    // Full list of configuration options available here:
+    // https://github.com/hakimel/reveal.js#configuration
+    Reveal.initialize({
+        controls: true,
+        progress: true,
+        history: true,
+        center: true,
+
+        theme: Reveal.getQueryHash().theme, // available themes are in /css/theme
+        transition: Reveal.getQueryHash().transition || 'default', // default/cube/page/concave/zoom/linear/fade/none
+
+        // Parallax scrolling
+        // parallaxBackgroundImage: 'https://s3.amazonaws.com/hakim-static/reveal-js/reveal-parallax-1.jpg',
+        // parallaxBackgroundSize: '2100px 900px',
+
+        // Optional libraries used to extend on reveal.js
+        dependencies: [
+            { src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+            { src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+            { src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+            { src: 'plugin/zoom-js/zoom.js', async: true, condition: function() { return !!document.body.classList; } },
+            { src: 'plugin/notes/notes.js', async: true, condition: function() { return !!document.body.classList; } }
+        ]
+    });
+
+</script>
+
+</body>
+</html>
